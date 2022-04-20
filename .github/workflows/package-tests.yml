@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [ 3.8, 3.9]
+        os: [ubuntu-latest]
+        python-version: [ 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -24,3 +24,23 @@ jobs:
     - name: Test
       run: |
         python test_config.py
+
+  armv64_job:
+    name: Build and Test for arm64
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+      - name: Install and Run tests
+        run: |
+           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+             arm64v8/ubuntu:20.04 \
+              bash -exc 'apt-get update && apt-get -y install git python3 python3-pip yarn && apt-get -y install curl && \
+              ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime && export DEBIAN_FRONTEND=noninteractive && apt-get install -y tzdata && dpkg-reconfigure --frontend noninteractive tzdata && \
+              python3 -m pip install --upgrade pip && \
+              python3 setup.py install && \
+              pip install pytest && \
+              pytest && \
+              deactivate'
