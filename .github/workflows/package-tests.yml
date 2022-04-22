@@ -43,4 +43,5 @@ jobs:
               python3 setup.py install && \
               pip install tox && \
               tox -e py38 && \
+              deactivate'
               
